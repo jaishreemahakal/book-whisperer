@@ -2,17 +2,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY backend/package*.json ./
+COPY package*.json ./
 
 RUN npm ci --only=production
 
-COPY scraper ./scraper
-WORKDIR /app/scraper
-RUN npm ci --only=production
-
-WORKDIR /app
-
-COPY backend/ .
+COPY . .
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
