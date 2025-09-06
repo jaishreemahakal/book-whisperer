@@ -2,18 +2,23 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copy backend package.json first
+COPY backend/package*.json ./
 
+# Install backend dependencies
 RUN npm ci --only=production
 
-COPY ../scraper/package*.json ./scraper/
+# Copy scraper package.json and install scraper dependencies
+COPY scraper/package*.json ./scraper/
 WORKDIR /app/scraper
 RUN npm ci --only=production
 
+# Go back to app directory
 WORKDIR /app
 
-COPY . .
-COPY ../scraper ./scraper
+# Copy all source code
+COPY backend/ .
+COPY scraper/ ./scraper
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
