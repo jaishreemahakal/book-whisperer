@@ -12,8 +12,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const allowedOrigins = [
-  "http://localhost:8080",                 
-  "https://book-whisperer-kohl.vercel.app/" 
+  "http://localhost:8080",
+  "http://localhost:5173",                 
+  "https://book-whisperer-kohl.vercel.app",
+  "https://book-whisperer.onrender.com"
 ];
 
 app.use(
