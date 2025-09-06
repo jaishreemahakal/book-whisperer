@@ -17,6 +17,14 @@ router.post('/refresh', async (req, res) => {
 
     let output = '';
     let errorOutput = '';
+    let hasResponded = false;
+
+    const sendResponse = (statusCode, responseData) => {
+      if (!hasResponded) {
+        hasResponded = true;
+        res.status(statusCode).json(responseData);
+      }
+    };
 
     scraperProcess.stdout.on('data', (data) => {
       output += data.toString();
@@ -31,7 +39,7 @@ router.post('/refresh', async (req, res) => {
     scraperProcess.on('close', (code) => {
       if (code === 0) {
         console.log('Scraper completed successfully');
-        res.json({
+        sendResponse(200, {
           success: true,
           message: 'Scraping completed successfully',
           output: output.trim(),
@@ -39,7 +47,7 @@ router.post('/refresh', async (req, res) => {
         });
       } else {
         console.error('Scraper failed with code:', code);
-        res.status(500).json({
+        sendResponse(500, {
           success: false,
           error: 'Scraping failed',
           message: `Scraper process exited with code ${code}`,
@@ -51,7 +59,7 @@ router.post('/refresh', async (req, res) => {
 
     scraperProcess.on('error', (error) => {
       console.error('Failed to start scraper:', error);
-      res.status(500).json({
+      sendResponse(500, {
         success: false,
         error: 'Failed to start scraper',
         message: error.message
@@ -61,7 +69,7 @@ router.post('/refresh', async (req, res) => {
     setTimeout(() => {
       if (!scraperProcess.killed) {
         scraperProcess.kill();
-        res.status(408).json({
+        sendResponse(408, {
           success: false,
           error: 'Scraping timeout',
           message: 'Scraper process took too long and was terminated'
