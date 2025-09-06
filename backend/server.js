@@ -11,11 +11,28 @@ const scraperRoutes = require('./routes/scraper');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const cors = require("cors");
+
+const allowedOrigins = [
+  "http://localhost:8080",                 
+  "https://book-whisperer-kohl.vercel.app/" 
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = "CORS policy: This origin is not allowed.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
+
 app.use(helmet());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
