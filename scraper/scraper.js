@@ -257,6 +257,7 @@ class BookScraper {
       process.exit(1);
     } finally {
       await this.cleanup();
+      process.exit(0);
     }
   }
 }
