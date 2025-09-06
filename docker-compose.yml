@@ -18,8 +18,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: book-explorer-backend
     restart: unless-stopped
     ports:
@@ -36,6 +36,21 @@ services:
       - ./backend:/app
       - /app/node_modules
 
+  scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    container_name: book-explorer-scraper
+    restart: on-failure
+    environment:
+      MONGODB_URI: mongodb://root:password@mongodb:27017/book-explorer?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - book-explorer-network
+    volumes:
+      - ./scraper:/app
+      - /app/node_modules
 
   frontend:
     build:

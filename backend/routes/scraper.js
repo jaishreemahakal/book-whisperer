@@ -8,19 +8,11 @@ router.post('/refresh', async (req, res) => {
   try {
     console.log('Refresh scraping requested');
     
-    const scraperPath = path.join(__dirname, '../scraper/scraper.js');
-    const scraperDir = path.join(__dirname, '../scraper');
-    
-    console.log('Scraper path:', scraperPath);
-    console.log('Scraper directory:', scraperDir);
+    const scraperPath = path.join(__dirname, '../../scraper/scraper.js');
     
     const scraperProcess = spawn('node', [scraperPath], {
       stdio: 'pipe',
-      cwd: scraperDir,
-      env: {
-        ...process.env,
-        NODE_PATH: path.join(scraperDir, 'node_modules')
-      }
+      cwd: path.join(__dirname, '../../scraper')
     });
 
     let output = '';
