@@ -23,20 +23,55 @@ export const BookExplorer = () => {
   
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const booksPerPage = 8;
+  const booksPerPage = 12;
   const [refreshing, setRefreshing] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalBooks: 0,
+    booksPerPage: 12,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
 
-  const fetchBooks = useCallback(async () => {
+  const fetchBooks = useCallback(async (page = currentPage, searchFilters = filters) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/books`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: booksPerPage.toString(),
+      });
+
+      if (searchFilters.search) {
+        params.append('search', searchFilters.search);
+      }
+      if (searchFilters.category) {
+        params.append('category', searchFilters.category);
+      }
+      if (searchFilters.rating !== null) {
+        params.append('minRating', searchFilters.rating.toString());
+      }
+      if (searchFilters.priceRange[0] > 0) {
+        params.append('minPrice', searchFilters.priceRange[0].toString());
+      }
+      if (searchFilters.priceRange[1] < 100) {
+        params.append('maxPrice', searchFilters.priceRange[1].toString());
+      }
+      if (searchFilters.stockStatus === 'in-stock') {
+        params.append('stockStatus', 'in-stock');
+      } else if (searchFilters.stockStatus === 'out-of-stock') {
+        params.append('stockStatus', 'out-of-stock');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/books?${params}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const responseData = await response.json();
       const data: Book[] = responseData.data;
       setBooks(data);
+      setPagination(responseData.pagination);
     } catch (e: any) {
       console.error("Failed to fetch books:", e);
       setError("Failed to load books. Please try again.");
@@ -48,11 +83,11 @@ export const BookExplorer = () => {
     } finally {
       setLoading(false);
     }
-  }, []); 
+  }, [booksPerPage]); 
 
   useEffect(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+    fetchBooks(currentPage, filters);
+  }, [fetchBooks, currentPage, filters]);
 
   const handleRefreshScraper = async () => {
     setRefreshing(true);
@@ -87,48 +122,20 @@ export const BookExplorer = () => {
     return [...new Set(cats)].sort();
   }, [books]);
 
-  const filteredBooks = useMemo(() => {
-    return books.filter(book => {
-      if (filters.search && !book.title.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false;
-      }
-      
-      if (filters.rating !== null && book.rating < filters.rating) {
-        return false;
-      }
-
-      if (book.price < filters.priceRange[0] || book.price > filters.priceRange[1]) {
-        return false;
-      }
-      
-      if (filters.stockStatus === 'in-stock' && book.stockAvailability !== 'In stock') {
-        return false;
-      }
-      if (filters.stockStatus === 'out-of-stock' && book.stockAvailability !== 'Out of stock') {
-        return false;
-      }
-      
-      if (filters.category && book.category !== filters.category) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [filters, books]);
-
-  const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
-  const currentBooks = filteredBooks.slice(
-    (currentPage - 1) * booksPerPage,
-    currentPage * booksPerPage
-  );
+  const currentBooks = books;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleFilterChange = (newFilters: SearchFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
   const statistics = useMemo(() => {
-    if (books.length === 0) {
+    if (pagination.totalBooks === 0) {
       return {
         totalBooks: 0,
         inStock: 0,
@@ -136,11 +143,11 @@ export const BookExplorer = () => {
       };
     }
     return {
-      totalBooks: books.length,
+      totalBooks: pagination.totalBooks,
       inStock: books.filter(b => b.stockAvailability === 'In stock').length,
-      avgRating: (books.reduce((sum, b) => sum + b.rating, 0) / books.length).toFixed(1),
+      avgRating: books.length > 0 ? (books.reduce((sum, b) => sum + b.rating, 0) / books.length).toFixed(1) : '0.0',
     };
-  }, [books]);
+  }, [books, pagination]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,18 +226,20 @@ export const BookExplorer = () => {
           </Button>
         </div>
 
-        <SearchFiltersComponent 
+        <SearchFiltersComponent
           filters={filters}
-          onFiltersChange={setFilters}
+          onFiltersChange={handleFilterChange}
           categories={categories}
         />
 
         <div className="flex justify-between items-center mb-6">
           <div className="font-medium text-literary-brown">
-            {filteredBooks.length} book{filteredBooks.length !== 1 ? 's' : ''} found
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Page {currentPage} of {Math.max(1, totalPages)}
+            {pagination.totalBooks} book{pagination.totalBooks !== 1 ? 's' : ''} found
+            {pagination.totalBooks > 0 && (
+              <span className="text-sm text-muted-foreground ml-2">
+                (Page {pagination.currentPage} of {pagination.totalPages})
+              </span>
+            )}
           </div>
         </div>
 
@@ -266,35 +275,35 @@ export const BookExplorer = () => {
           </div>
         )}
 
-        {totalPages > 1 && (
+        {pagination.totalPages > 1 && (
           <div className="flex justify-center items-center gap-2">
             <Button
               variant="outline"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={!pagination.hasPrevPage}
             >
               <ChevronLeft className="w-4 h-4" />
               Previous
             </Button>
             
-            {[...Array(totalPages)].map((_, i) => {
+            {[...Array(pagination.totalPages)].map((_, i) => {
               const page = i + 1;
               if (
                 page === 1 ||
-                page === totalPages ||
-                (page >= currentPage - 1 && page <= currentPage + 1)
+                page === pagination.totalPages ||
+                (page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1)
               ) {
                 return (
                   <Button
                     key={page}
-                    variant={currentPage === page ? 'default' : 'outline'}
+                    variant={pagination.currentPage === page ? 'default' : 'outline'}
                     onClick={() => handlePageChange(page)}
-                    className={currentPage === page ? 'bg-literary-brown hover:bg-literary-navy' : ''}
+                    className={pagination.currentPage === page ? 'bg-literary-brown hover:bg-literary-navy' : ''}
                   >
                     {page}
                   </Button>
                 );
-              } else if (page === currentPage - 2 || page === currentPage + 2) {
+              } else if (page === pagination.currentPage - 2 || page === pagination.currentPage + 2) {
                 return <span key={page} className="px-2">...</span>;
               }
               return null;
@@ -302,8 +311,8 @@ export const BookExplorer = () => {
             
             <Button
               variant="outline"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={!pagination.hasNextPage}
             >
               Next
               <ChevronRight className="w-4 h-4" />
