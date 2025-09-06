@@ -11,8 +11,6 @@ const scraperRoutes = require('./routes/scraper');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const cors = require("cors");
-
 const allowedOrigins = [
   "http://localhost:8080",                 
   "https://book-whisperer-kohl.vercel.app/" 
