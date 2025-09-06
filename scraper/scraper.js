@@ -38,7 +38,7 @@ class BookScraper {
     let currentPage = 1;
     let hasNextPage = true;
 
-    while (hasNextPage && currentPage <= 2) {
+    while (hasNextPage && currentPage <= 10) {
       console.log(`Scraping page ${currentPage}...`);
 
       const pageUrl =

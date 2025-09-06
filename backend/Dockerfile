@@ -6,7 +6,14 @@ COPY package*.json ./
 
 RUN npm ci --only=production
 
+COPY ../scraper/package*.json ./scraper/
+WORKDIR /app/scraper
+RUN npm ci --only=production
+
+WORKDIR /app
+
 COPY . .
+COPY ../scraper ./scraper
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
