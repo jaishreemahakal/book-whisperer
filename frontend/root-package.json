@@ -1,0 +1,44 @@
+{
+  "name": "book-explorer",
+  "version": "1.0.0",
+  "description": "A full-stack web application for exploring and managing books scraped from Books to Scrape",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm run install:backend && npm run install:scraper && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:scraper": "cd scraper && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:scraper": "cd scraper && npm run dev",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run build && npm run preview",
+    "scrape": "cd scraper && npm start",
+    "build": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "keywords": [
+    "books",
+    "scraping",
+    "web-scraping",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb",
+    "puppeteer",
+    "full-stack"
+  ],
+  "author": "Book Explorer Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/book-explorer.git"
+  }
+}

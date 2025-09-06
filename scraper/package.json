@@ -1,0 +1,25 @@
+{
+  "name": "book-explorer-scraper",
+  "version": "1.0.0",
+  "description": "Web scraper for Books to Scrape website",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js",
+    "dev": "nodemon scraper.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "mongoose": "^7.5.0",
+    "p-limit": "^4.0.0",
+    "puppeteer": "^24.19.0"
+  },
+  "devDependencies": {
+    "jest": "^29.6.4",
+    "nodemon": "^3.0.1"
+  },
+  "author": "Book Explorer Team",
+  "license": "MIT"
+}
