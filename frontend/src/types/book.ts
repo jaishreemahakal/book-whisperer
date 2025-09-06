@@ -1,5 +1,6 @@
 export interface Book {
-  id: string;
+  _id: string;
+  id?: string; // For backward compatibility
   title: string;
   price: number;
   stockAvailability: 'In stock' | 'Out of stock';
@@ -9,6 +10,11 @@ export interface Book {
   description?: string;
   category?: string;
   author?: string;
+  isbn?: string;
+  scrapedAt?: string;
+  lastUpdated?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SearchFilters {

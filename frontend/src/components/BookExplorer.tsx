@@ -248,9 +248,9 @@ export const BookExplorer = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
             {currentBooks.map((book, index) => (
               <BookCard
-                key={book.id ? book.id : index}
+                key={book._id || book.id || index}
                 book={book}
-                onViewDetails={() => setSelectedBookId(book.id)}
+                onViewDetails={() => setSelectedBookId(book._id || book.id)}
               />
             ))}
           </div>

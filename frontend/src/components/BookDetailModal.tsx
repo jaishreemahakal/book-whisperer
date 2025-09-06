@@ -37,7 +37,8 @@ export const BookDetailModal = ({ bookId, isOpen, onClose }: BookDetailModalProp
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data: Book = await response.json();
+        const responseData = await response.json();
+        const data: Book = responseData.data;
         setBook(data);
       } catch (e: any) {
         console.error("Failed to fetch book details:", e);
@@ -219,7 +220,7 @@ export const BookDetailModal = ({ bookId, isOpen, onClose }: BookDetailModalProp
 
             <div className="text-sm text-muted-foreground space-y-1">
               <p><strong>Availability:</strong> {book.stockAvailability}</p>
-              <p><strong>Book ID:</strong> #{book.id}</p>
+              <p><strong>Book ID:</strong> #{book._id || book.id}</p>
             </div>
           </div>
         </div>
